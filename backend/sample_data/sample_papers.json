@@ -1,0 +1,104 @@
+[
+  {
+    "paper_id": "paper_fsl_01",
+    "title": "Few-Shot Prompt Learning for Pre-trained Language Models: A Comprehensive Survey",
+    "authors": ["Elena Rostova", "Marcus Chen", "David K. Sutton"],
+    "year": 2023,
+    "abstract": "Prompt-based learning has emerged as a dominant paradigm in few-shot natural language processing, allowing foundation models to generalize from very few labeled examples. This survey examines prompt formatting, continuous prefix tuning, and verbalizer design. We systematically analyze downstream performance across text classification, relation extraction, and reasoning benchmarks.",
+    "citation_count": 142,
+    "url": "https://arxiv.org/abs/2301.00001",
+    "sections": {
+      "abstract": "Prompt-based learning has emerged as a dominant paradigm in few-shot natural language processing, allowing foundation models to generalize from very few labeled examples. This survey examines prompt formatting, continuous prefix tuning, and verbalizer design. We systematically analyze downstream performance across text classification, relation extraction, and reasoning benchmarks.",
+      "introduction": "Recent advances in pre-trained language models have established few-shot learning as an effective strategy when labeled data is scarce. Instead of fine-tuning all model weights, prompt learning reformulates downstream tasks as cloze-style predictions. However, small variations in prompt formatting frequently yield erratic performance fluctuations across diverse datasets.",
+      "methodology": "We benchmark hard manual prompt construction against soft continuous prompt optimization. In our evaluation protocol, models receive between 4 and 16 labeled exemplars per category across SuperGLUE tasks. Verbalizer mapping functions were compared using mutual information scoring.",
+      "results": "Continuous prompt tuning consistently outperforms manual discrete prompts on large models (>10B parameters). However, on smaller models (<1B parameters), prompt tuning fails to stabilize during optimization, displaying high sensitivity to random seed initialization.",
+      "limitations_future_work": "A primary limitation of current few-shot prompt learners is their vulnerability to adversarial out-of-distribution transfer, which remains an unexplored open challenge. Furthermore, the high computational cost of prefix tuning on long contexts limits practical deployment. Future work should investigate automated token-free prompt calibration.",
+      "conclusion": "Prompt learning represents a powerful paradigm shift, yet robust generalization across heterogeneous task distributions remains an unsolved problem."
+    }
+  },
+  {
+    "paper_id": "paper_fsl_02",
+    "title": "Meta-Learning via Prototypical Metric Spaces in Cross-Domain NLP",
+    "authors": ["Marcus Chen", "Sophia Al-Mansoor"],
+    "year": 2020,
+    "abstract": "Prototypical networks learn an inductive metric space where classification is performed by computing distances to category representations. We apply prototypical meta-learning to cross-domain sentiment analysis and intent detection under extreme low-resource conditions.",
+    "citation_count": 89,
+    "url": "https://arxiv.org/abs/2005.00002",
+    "sections": {
+      "abstract": "Prototypical networks learn an inductive metric space where classification is performed by computing distances to category representations. We apply prototypical meta-learning to cross-domain sentiment analysis and intent detection under extreme low-resource conditions.",
+      "introduction": "Meta-learning trains models across multiple episodic support sets to facilitate rapid adaptation. In cross-domain NLP, discrepancies between source and target vocabularies severely hinder zero-shot transfer.",
+      "methodology": "We compute class prototypes as the Euclidean centroid of embedded support examples using a shared BERT encoder. Training optimizes episodic cross-entropy loss over 5-way 1-shot and 5-way 5-shot episodes.",
+      "results": "Our prototypical metric space yields significant accuracy gains of +8.4% on in-domain tasks. However, performance degrades substantially when source and target domains exhibit significant linguistic vocabulary drift.",
+      "limitations_future_work": "We leave dynamic metric adaptation across mismatched linguistic domains for future work. The Euclidean distance metric assumption fails to capture non-linear semantic manifolds in contextual representations.",
+      "conclusion": "Prototypical networks excel in low-data regimes but suffer under severe cross-domain distributional shift."
+    }
+  },
+  {
+    "paper_id": "paper_fsl_03",
+    "title": "Calibrate Before Use: Mitigating Majority and Recency Bias in Few-Shot Learning",
+    "authors": ["Tony Z. Zhao", "Eric Wallace", "Shi Feng"],
+    "year": 2021,
+    "abstract": "Few-shot learners often suffer from systematic prediction biases toward majority classes or recency bias toward exemplars presented late in the prompt. We introduce contextual calibration to estimate and subtract test-time prior probability offsets.",
+    "citation_count": 310,
+    "url": "https://arxiv.org/abs/2102.00003",
+    "sections": {
+      "abstract": "Few-shot learners often suffer from systematic prediction biases toward majority classes or recency bias toward exemplars presented late in the prompt. We introduce contextual calibration to estimate and subtract test-time prior probability offsets.",
+      "introduction": "Language models conditioned on a few demonstrations frequently output unbalanced predictions. When evaluated with null inputs like 'N/A', models often assign probability exceeding 70% to a single class, revealing severe intrinsic bias.",
+      "methodology": "We pass a content-free token string through the prompt to compute affine transformation parameters (W and b) that adjust prediction logits to equal uniform probability.",
+      "results": "Contextual calibration boosts few-shot accuracy by up to 30% across multiple benchmarks without requiring any gradient updates or extra training parameters.",
+      "limitations_future_work": "Further investigation is needed to formulate theoretical bounds for contextual calibration in multi-task setups. A noticeable limitation is that calibration relies on heuristic content-free string selection, which fails on non-classification tasks.",
+      "conclusion": "Simple logit adjustment provides an effective remedy for demonstration ordering and prior bias in few-shot prompting."
+    }
+  },
+  {
+    "paper_id": "paper_fsl_04",
+    "title": "Parameter-Efficient Few-Shot Tuning with Low-Rank Adaptation (LoRA)",
+    "authors": ["Edward J. Hu", "Yelong Shen", "Phillip Wallis"],
+    "year": 2022,
+    "abstract": "Full fine-tuning of massive language models becomes infeasible with limited computation. We introduce Low-Rank Adaptation (LoRA), which freezes pre-trained weights and injects trainable rank decomposition matrices into Transformer attention layers.",
+    "citation_count": 1250,
+    "url": "https://arxiv.org/abs/2106.00004",
+    "sections": {
+      "abstract": "Full fine-tuning of massive language models becomes infeasible with limited computation. We introduce Low-Rank Adaptation (LoRA), which freezes pre-trained weights and injects trainable rank decomposition matrices into Transformer attention layers.",
+      "introduction": "Deploying dedicated fine-tuned models for thousands of downstream tasks requires immense storage and GPU memory. LoRA addresses this bottleneck by decomposing weight update matrices into low intrinsic rank representations.",
+      "methodology": "For an attention projection matrix W, we constrain its update to delta-W = B * A, where B and A are matrices of rank r << d. During inference, weights are merged directly into pre-trained layers with zero inference latency overhead.",
+      "results": "LoRA matches or outperforms full fine-tuning on RoBERTa and GPT-3 while training fewer than 0.1% of parameters. However, conflicting results arise in extreme low-data regimes (<4 shots), where LoRA fails to preserve syntactic constraints.",
+      "limitations_future_work": "An open problem remains in determining optimal rank allocation across heterogeneous attention heads dynamically. Furthermore, LoRA does not address catastrophic forgetting when tasks are introduced in sequential continual learning environments.",
+      "conclusion": "Low-rank adaptation provides an efficient alternative to full fine-tuning, paving the way for multi-task few-shot personalization."
+    }
+  },
+  {
+    "paper_id": "paper_fsl_05",
+    "title": "Adversarial Robustness in Few-Shot Classification: A Forgotten Frontier",
+    "authors": ["Vikramaditya Iyer", "Hannah Braun", "Klaus Richter"],
+    "year": 2019,
+    "abstract": "While few-shot classification methods achieve impressive clean accuracy, their security and robustness under targeted input perturbations remain largely unmeasured. We show that state-of-the-art few-shot meta-learners can be crippled by imperceptible character-level modifications.",
+    "citation_count": 64,
+    "url": "https://arxiv.org/abs/1910.00005",
+    "sections": {
+      "abstract": "While few-shot classification methods achieve impressive clean accuracy, their security and robustness under targeted input perturbations remain largely unmeasured. We show that state-of-the-art few-shot meta-learners can be crippled by imperceptible character-level modifications.",
+      "introduction": "Machine learning systems deployed in mission-critical applications must demonstrate resilience against malicious exploitation. In few-shot regimes, models must infer class boundaries from minimal evidence, amplifying vulnerability to adversarial noise.",
+      "methodology": "We construct black-box and white-box word substitution attacks against meta-learning classifiers on the FewRel and miniImageNet datasets. Perturbation budgets are restricted to preserve semantic equivalence.",
+      "results": "While standard few-shot classifiers reach 85% accuracy on clean benchmarks, minor adversarial perturbations decrease accuracy to below 30%. The trade-off between semantic generalization and adversarial robustness remains contested.",
+      "limitations_future_work": "Future research should explore certified perturbation bounds in meta-testing. Our study was restricted to classification tasks; adversarial vulnerability in generative few-shot reasoning remains unexplored.",
+      "conclusion": "Few-shot models are substantially more fragile to adversarial noise than fully supervised counterparts, requiring defensive training protocols."
+    }
+  },
+  {
+    "paper_id": "paper_fsl_06",
+    "title": "Cross-Lingual Few-Shot Transfer for Low-Resource Languages",
+    "authors": ["Amina Diallo", "Rajesh Mukherjee", "Liam O'Connor"],
+    "year": 2024,
+    "abstract": "Multilingual foundation models exhibit striking disparity when transferring few-shot capabilities from high-resource languages to morphologically complex, low-resource African and Indic languages. We propose bilingual anchor alignment to improve semantic grounding.",
+    "citation_count": 22,
+    "url": "https://arxiv.org/abs/2402.00006",
+    "sections": {
+      "abstract": "Multilingual foundation models exhibit striking disparity when transferring few-shot capabilities from high-resource languages to morphologically complex, low-resource African and Indic languages. We propose bilingual anchor alignment to improve semantic grounding.",
+      "introduction": "Although multilingual models boast capability across 100+ languages, over 95% of pre-training tokens belong to dominant Western languages. Consequently, few-shot prompting fails dramatically on low-resource vernaculars.",
+      "methodology": "We evaluate cross-lingual transfer using 5-shot prompt examples translated via pivot dictionaries. Anchor alignment loss is introduced to regularize token embeddings across divergent scripts.",
+      "results": "Few-shot transfer heavily favors typologically similar language pairs. For morphologically rich low-resource languages, cross-lingual few-shot transfer exhibits steep decay without explicit dictionary anchors.",
+      "limitations_future_work": "A major limitation of our framework is the reliance on bilingual lexicons; scaling to truly unwritten dialectal corpora remains completely unexplored. Furthermore, tokenizer fragmentation creates disproportionate token lengths for non-Latin scripts.",
+      "conclusion": "Cross-lingual few-shot learning requires fundamental innovations beyond English-centric pre-training architectures."
+    }
+  }
+]

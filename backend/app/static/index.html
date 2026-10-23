@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gaplens • Autonomous Research Paper & Gap Discovery System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #07090e;
+      --bg-card: #0d121c;
+      --bg-card-hover: #131b28;
+      --bg-elevated: #162030;
+      --bg-code: #080d15;
+      --line: #1c2738;
+      --line-light: #2a3a52;
+      --ink: #f8fafc;
+      --mute: #94a3b8;
+      --dim: #64748b;
+      --pri: #ea384c;
+      --pri-hover: #ff4d61;
+      --pri-glow: rgba(234, 56, 76, 0.28);
+      --cyan: #38bdf8;
+      --cyan-glow: rgba(56, 189, 248, 0.2);
+      --ok: #10b981;
+      --bad: #f43f5e;
+      --warn: #f59e0b;
+      --s1: #38bdf8;
+      /* Sparsity */
+      --s2: #f59e0b;
+      /* Temporal Decay */
+      --s3: #ea384c;
+      /* Contradiction */
+      --s4: #10b981;
+      /* Author Admission */
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --font-mono: 'JetBrains Mono', Consolas, Monaco, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--ink);
+      font-family: var(--font-sans);
+      font-size: 14.5px;
+      line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Radial Red Glow at Top */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 520px;
+      background: radial-gradient(circle at 50% -8%, rgba(234, 56, 76, 0.16) 0%, rgba(13, 17, 23, 0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #1c2738;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #2f4058;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(7, 9, 14, 0.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      padding: 0.85rem 2rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 2rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #ea384c, #c026d3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 15px rgba(234, 56, 76, 0.5);
+      font-weight: 800;
+      font-size: 15px;
+      color: #fff;
+    }
+
+    .brand-text h1 {
+      font-size: 1.18rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+      line-height: 1.1;
+    }
+
+    .brand-text h1 span {
+      color: var(--pri);
+    }
+
+    .brand-text p {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--dim);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .api-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.85rem;
+      color: var(--mute);
+      background: rgba(13, 18, 28, 0.6);
+      border: 1px solid var(--line);
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--dim);
+      transition: all 0.3s ease;
+    }
+
+    .dot.on {
+      background: var(--ok);
+      box-shadow: 0 0 8px var(--ok);
+    }
+
+    .dot.off {
+      background: var(--bad);
+      box-shadow: 0 0 8px var(--bad);
+    }
+
+    .api-bar input {
+      background: transparent;
+      border: none;
+      color: var(--ink);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    /* Application Sidebar Layout */
+    .app-layout {
+      display: flex;
+      min-height: 100vh;
+      position: relative;
+    }
+
+    .sidebar {
+      width: 285px;
+      min-width: 285px;
+      background: rgba(8, 12, 19, 0.96);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--line);
+      padding: 1.25rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      overflow-y: auto;
+      z-index: 100;
+    }
+
+    .sidebar-top {
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .sidebar-heading {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--dim);
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .sidebar-tab-btn {
+      background: rgba(13, 18, 28, 0.6);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.65rem 0.9rem;
+      font-family: var(--font-sans);
+      font-size: 0.86rem;
+      font-weight: 500;
+      color: var(--mute);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      width: 100%;
+      text-align: left;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .sidebar-tab-btn:hover {
+      color: var(--ink);
+      background: var(--bg-card-hover);
+      border-color: #384252;
+    }
+
+    .sidebar-tab-btn[aria-selected="true"],
+    .sidebar-tab-btn.active {
+      color: #fff;
+      background: #111a28;
+      border-color: var(--cyan);
+      box-shadow: 0 0 16px rgba(56, 189, 248, 0.18);
+      font-weight: 600;
+    }
+
+    .sidebar-engine-card {
+      background: linear-gradient(180deg, rgba(14, 22, 35, 0.9), rgba(9, 14, 23, 0.95));
+      border: 1px solid #1c2e44;
+      border-radius: 10px;
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.35);
+    }
+
+    .sidebar-status-tag {
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      line-height: 1.35;
+      background: rgba(6, 10, 16, 0.7);
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid #162438;
+    }
+
+    .sidebar-select-label {
+      font-size: 0.72rem;
+      color: var(--mute);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sidebar-select {
+      width: 100%;
+      background: #040810;
+      color: #f1f5f9;
+      border: 1px solid #1f3552;
+      border-radius: 6px;
+      padding: 7px 8px;
+      font-size: 0.82rem;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .sidebar-select:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+    }
+
+    .sidebar-backend-box {
+      background: rgba(13, 18, 28, 0.6);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .sidebar-backend-box input {
+      background: transparent;
+      border: none;
+      color: var(--mute);
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      outline: none;
+      width: 140px;
+    }
+
+    .main-wrapper {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mobile-header {
+      display: none;
+      padding: 0.75rem 1.25rem;
+      background: rgba(7, 9, 14, 0.95);
+      border-bottom: 1px solid var(--line);
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 90;
+    }
+
+    @media(max-width: 900px) {
+      .app-layout {
+        flex-direction: column;
+      }
+      .sidebar {
+        display: none;
+        width: 100%;
+        height: auto;
+        position: relative;
+        border-right: none;
+        border-bottom: 1px solid var(--line);
+      }
+      .sidebar.mobile-open {
+        display: flex;
+      }
+      .mobile-header {
+        display: flex;
+      }
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(6px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-card {
+      background: #0d1421;
+      border: 1px solid #1c2e46;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 480px;
+      padding: 1.5rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    /* Toasts */
+    #toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+    .toast {
+      background: #0d1624;
+      border: 1px solid #1c324e;
+      color: #f1f5f9;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      animation: fadeIn 0.2s ease-out;
+      pointer-events: auto;
+    }
+    .toast.ok { border-color: rgba(16, 185, 129, 0.5); color: #6ee7b7; }
+    .toast.err { border-color: rgba(244, 63, 94, 0.5); color: #fda4af; }
+
+    /* Main Layout */
+    main {
+      position: relative;
+      z-index: 10;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1.5rem 5rem;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .panel.on {
+      display: block;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Redis-Style Cards */
+    .card {
+      background: linear-gradient(180deg, rgba(16, 24, 38, 0.8) 0%, rgba(11, 16, 25, 0.95) 100%);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1.6rem 1.8rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 18px 40px -15px rgba(0, 0, 0, 0.7);
+      position: relative;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.25), transparent);
+    }
+
+    h2,
+    h3,
+    h4 {
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-size: 1.35rem;
+      margin-bottom: 0.4rem;
+    }
+
+    h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Redis Badge Pill */
+    .badge-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      background: rgba(234, 56, 76, 0.12);
+      border: 1px solid rgba(234, 56, 76, 0.3);
+      color: #fca5a5;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .badge-cyan {
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      color: #7dd3fc;
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      align-items: flex-end;
+    }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      font-size: 0.82rem;
+      color: var(--mute);
+      gap: 0.35rem;
+      font-weight: 500;
+    }
+
+    input,
+    textarea,
+    select {
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      color: var(--ink);
+      background: #080d15;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.6rem 0.8rem;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 90px;
+      resize: vertical;
+      line-height: 1.5;
+    }
+
+    /* Redis Primary Action Buttons */
+    button.btn {
+      background: var(--pri);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.88rem;
+      border-radius: 8px;
+      padding: 0.62rem 1.2rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 14px var(--pri-glow);
+    }
+
+    button.btn:hover {
+      background: var(--pri-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(234, 56, 76, 0.45);
+    }
+
+    button.btn:disabled {
+      opacity: 0.5;
+      cursor: wait;
+      transform: none;
+    }
+
+    button.ghost {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--ink);
+      border: 1px solid var(--line);
+      box-shadow: none;
+    }
+
+    button.ghost:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: var(--line-light);
+      transform: none;
+    }
+
+    button.ghost.danger {
+      color: #fca5a5;
+      border-color: rgba(234, 56, 76, 0.3);
+    }
+
+    button.ghost.danger:hover {
+      background: rgba(234, 56, 76, 0.12);
+      border-color: var(--pri);
+    }
+
+    .msg {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      margin: 0.8rem 0;
+      font-size: 0.88rem;
+      background: #080d15;
+      border-left: 4px solid var(--cyan);
+    }
+
+    .msg.err {
+      border-left-color: var(--bad);
+      color: #fca5a5;
+      background: rgba(234, 56, 76, 0.08);
+    }
+
+    .msg.ok {
+      border-left-color: var(--ok);
+      color: #86efac;
+      background: rgba(16, 185, 129, 0.08);
+    }
+
+    .muted {
+      color: var(--mute);
+      font-size: 0.85rem;
+    }
+
+    /* Hero Visual Box in Redis Style */
+    .hero-box {
+      display: grid;
+      grid-template-columns: minmax(320px, 1.2fr) minmax(280px, 0.8fr);
+      gap: 2rem;
+      align-items: center;
+      padding: 2.5rem 2rem;
+    }
+
+    @media(max-width: 820px) {
+      .hero-box {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .isometric-shelf {
+      position: relative;
+      width: 100%;
+      max-width: 320px;
+      margin: 0 auto;
+      background: linear-gradient(145deg, #0d1726, #060b12);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 18px;
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(56, 189, 248, 0.15);
+    }
+
+    .isometric-grid {
+      height: 150px;
+      background: #04070c;
+      border: 1px solid #162032;
+      border-radius: 8px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(2, 1fr);
+      gap: 6px;
+      padding: 10px;
+      position: relative;
+    }
+
+    .cube-cell {
+      border-radius: 4px;
+      background: #111e30;
+      transition: all 0.3s ease;
+    }
+
+    .cube-active {
+      background: #38bdf8;
+      box-shadow: 0 0 12px #38bdf8;
+    }
+
+    .cube-red {
+      background: #ea384c;
+      box-shadow: 0 0 14px #ea384c;
+    }
+
+    .cube-amber {
+      background: #f59e0b;
+      box-shadow: 0 0 10px #f59e0b;
+    }
+
+    /* Paper list & Tags */
+    .paper {
+      border-top: 1px solid var(--line);
+      padding: 1rem 0;
+      display: flex;
+      justify-content: space-between;
+      gap: 1.2rem;
+    }
+
+    .paper:first-child {
+      border-top: 0;
+    }
+
+    .paper p {
+      margin: 0.35rem 0;
+      color: var(--mute);
+      font-size: 0.86rem;
+    }
+
+    .tag {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 2px 7px;
+      font-size: 0.72rem;
+      color: var(--mute);
+      margin-right: 0.4rem;
+      font-family: var(--font-mono);
+    }
+
+    blockquote {
+      margin: 0.6rem 0;
+      padding: 0.5rem 0.9rem;
+      border-left: 3px solid var(--pri);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 0 6px 6px 0;
+      color: #e2e8f0;
+      font-size: 0.88rem;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .answer {
+      background: #080d15;
+      border: 1px solid #1a2538;
+      border-radius: 8px;
+      padding: 1.2rem 1.4rem;
+      font-size: 0.98rem;
+      line-height: 1.7;
+      color: #f1f5f9;
+      white-space: pre-wrap;
+    }
+
+    /* Signals Multi-bar representation */
+    .bars {
+      display: grid;
+      grid-template-columns: 140px 1fr 45px;
+      gap: 0.4rem 0.8rem;
+      align-items: center;
+      font-size: 0.82rem;
+      margin: 0.8rem 0;
+    }
+
+    .bar {
+      height: 8px;
+      background: #080d15;
+      border: 1px solid #192434;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar i {
+      display: block;
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    .score {
+      font-size: 1.6rem;
+      font-weight: 800;
+      font-family: var(--font-sans);
+      color: var(--pri);
+      letter-spacing: -0.02em;
+    }
+
+    /* Stats Metric Grid */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 1rem;
+    }
+
+    .stat {
+      background: rgba(13, 20, 31, 0.6);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 1.1rem;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.02em;
+      margin-top: 0.2rem;
+    }
+
+    /* 2D Topic Map SVG */
+    svg.map {
+      width: 100%;
+      height: auto;
+      background: #040810;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.6);
+    }
+
+    svg.map text {
+      font-family: var(--font-sans);
+      font-size: 11px;
+    }
+
+    .cl {
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .cl:hover {
+      filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.6));
+    }
+
+    .cl.sel circle {
+      stroke: #fff;
+      stroke-width: 3;
+    }
+
+    details {
+      margin-top: 0.5rem;
+    }
+
+    details summary {
+      cursor: pointer;
+      color: var(--cyan);
+      font-size: 0.85rem;
+      font-weight: 600;
+      outline: none;
+      padding: 2px 0;
+    }
+
+    details summary:hover {
+      text-decoration: underline;
+    }
+
+    details p {
+      margin-top: 0.4rem;
+    }
+
+    .cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    @media(max-width:760px) {
+      .cols {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Range sliders */
+    input[type=range] {
+      accent-color: var(--pri);
+      cursor: pointer;
+      height: 6px;
+      background: #141f2e;
+      border-radius: 3px;
+      border: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app-layout">
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar" id="app-sidebar">
+      <div class="sidebar-top">
+        <div class="brand" onclick="switchTab('papers')" style="cursor:pointer">
+          <div class="brand-icon" title="Gaplens">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="10.5" cy="10.5" r="6.5"></circle>
+              <line x1="15.5" y1="15.5" x2="21" y2="21"></line>
+              <path d="M8.5 10.5A2 2 0 0 1 10.5 8.5" stroke-width="1.8" opacity="0.65"></path>
+            </svg>
+          </div>
+          <div class="brand-text">
+            <h1>Gap<span>lens</span></h1>
+            <p>Autonomous Gap Discovery</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Menu -->
+      <div class="sidebar-section">
+        <div class="sidebar-heading">NAVIGATION</div>
+        <nav class="sidebar-nav" role="tablist">
+          <button role="tab" class="sidebar-tab-btn active" aria-selected="true" data-t="papers">📚 Academic Library</button>
+          <button role="tab" class="sidebar-tab-btn" aria-selected="false" data-t="ask">🔍 Traceable RAG Q&A</button>
+          <button role="tab" class="sidebar-tab-btn" aria-selected="false" data-t="gaps">⚡ Research Gap Matrix</button>
+          <button role="tab" class="sidebar-tab-btn" aria-selected="false" data-t="eval">📊 Benchmark & Validation</button>
+        </nav>
+      </div>
+
+      <!-- AI MODEL SETTINGS SECTION -->
+      <div class="sidebar-section">
+        <div class="sidebar-heading" style="display:flex;justify-content:space-between;align-items:center">
+          <span>AI MODEL SETTINGS</span>
+          <span class="dot on" id="sidebar-dot" title="Active Provider"></span>
+        </div>
+        <div class="sidebar-engine-card">
+          <!-- Active Provider / Model Status Badge -->
+          <div class="sidebar-status-tag" id="sidebar-engine-label">
+            Active: <b style="color:var(--cyan)">GROQ</b> <span style="font-size:0.75rem;color:#94a3b8">(openai/gpt-oss-120b)</span>
+          </div>
+
+          <!-- Provider Selector -->
+          <label class="sidebar-select-label">LLM Provider
+            <select id="llm-provider-select" class="sidebar-select">
+              <option value="groq" selected>Groq (Ultra-Fast Cloud)</option>
+              <option value="openai">OpenAI</option>
+              <option value="gemini">Google Gemini</option>
+              <option value="anthropic">Anthropic Claude</option>
+              <option value="ollama">Ollama (Local Server)</option>
+              <option value="mock">Mock (Offline Heuristic)</option>
+            </select>
+          </label>
+
+          <!-- Model Selector (Dynamically populated based on Provider) -->
+          <label class="sidebar-select-label">Model
+            <select id="llm-model-select" class="sidebar-select">
+              <!-- Populated by JavaScript according to Provider -->
+            </select>
+          </label>
+
+          <!-- Key Status / Missing Key Warning -->
+          <div id="sidebar-key-warning" style="display:none;font-size:0.73rem;padding:6px 8px;border-radius:6px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:#fbbf24;line-height:1.35">
+            ⚠️ Missing Key
+          </div>
+
+          <button type="button" class="btn ghost" id="btn-open-keys" style="padding:5px 8px;font-size:0.74rem;width:100%;margin-top:2px">🔑 API Key Settings</button>
+        </div>
+      </div>
+
+      <!-- Backend Server Status Footer -->
+      <div class="sidebar-section" style="margin-top:auto">
+        <div class="sidebar-heading">BACKEND SERVER</div>
+        <div class="sidebar-backend-box">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="dot on" id="dot" title="Connection status"></span>
+            <input id="base" value="http://127.0.0.1:8000/api" title="API URL">
+          </div>
+          <button class="btn ghost" id="ping" style="padding:0.25rem 0.6rem;font-size:0.72rem">Ping</button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN APPLICATION VIEW -->
+    <div class="main-wrapper">
+      <header class="mobile-header">
+        <button id="sidebar-toggle-btn" class="btn ghost" style="padding:4px 8px;font-size:0.85rem">☰ Menu</button>
+        <div class="brand-text">
+          <h1 style="font-size:1.05rem">Gap<span style="color:var(--pri)">lens</span></h1>
+        </div>
+        <div id="mobile-engine-pill" class="tag badge-cyan" style="margin:0;font-size:0.72rem">GROQ: 120B</div>
+      </header>
+
+      <main>
+    <!-- HERO SHOWCASE BANNER (Redis-style isometric matrix) -->
+    <div class="card hero-box">
+      <div>
+        <span class="badge-pill">MULTI-SIGNAL SCIENTIFIC DISCOVERY</span>
+        <h2 style="font-size: 2rem; line-height: 1.2; margin: 0.5rem 0 1rem; color: #fff;">
+          Say goodbye to <br>
+          <span style="color: #fff;">unexplored research frontiers.</span>
+        </h2>
+        <p class="muted" style="max-width: 520px; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.4rem;">
+          Cluster academic embeddings, identify sparse frontiers, trace author-admitted limitations, and detect
+          contradictory claims across thousands of papers in real time.
+        </p>
+        <div class="row">
+          <button class="btn" onclick="switchTab('gaps')">Run Gap Matrix</button>
+          <button class="btn ghost" onclick="switchTab('ask')">Grounded Citations Q&A</button>
+        </div>
+      </div>
+
+      <!-- 3D Isometric Cluster Cube Box -->
+      <div class="isometric-shelf">
+        <div
+          style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line)">
+          <span style="font-size:0.72rem;font-weight:700;letter-spacing:0.05em;color:#e2e8f0">DENSE VECTOR
+            SPARSITY</span>
+          <span class="badge-pill badge-cyan" style="margin:0;font-size:0.68rem">4 SIGNALS</span>
+        </div>
+        <div class="isometric-grid">
+          <div class="cube-cell cube-active"></div>
+          <div class="cube-cell"></div>
+          <div class="cube-cell cube-red"></div>
+          <div class="cube-cell"></div>
+          <div class="cube-cell cube-active"></div>
+          <div class="cube-cell cube-amber"></div>
+        </div>
+        <div
+          style="margin-top:12px;padding:6px 10px;background:#05080e;border-radius:6px;border:1px solid #141e2e;font-family:var(--font-mono);font-size:0.75rem;color:var(--cyan)">
+          <span style="color:var(--warn)">$ SCORE:</span> w1·Sparsity + w2·Decay + w3·Contradict + w4·Admit
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 1: PAPERS & INGESTION -->
+    <section class="panel on" id="papers">
+      <div class="card">
+        <span class="badge-pill badge-cyan">DATA ACQUISITION & INGESTION</span>
+        <h2>Ingest Academic Literature</h2>
+        <p class="muted" style="margin-bottom:1.2rem">Seed from curated peer-reviewed NLP papers, query arXiv directly,
+          or upload PDF files to extract sections and generate chunk embeddings.</p>
+
+        <div class="row"
+          style="background:rgba(255,255,255,0.02);padding:1rem;border-radius:8px;border:1px solid var(--line)">
+          <button class="btn" id="loadSample">Seed Benchmark Corpus</button>
+          <span class="muted" style="align-self:center">Curated papers on Few-Shot Learning in NLP (2019–2024).
+            Recommended first step.</span>
+        </div>
+
+        <hr style="border:0;border-top:1px solid var(--line);margin:1.4rem 0">
+
+        <h3>Query & Index from arXiv</h3>
+        <div class="row" style="margin-top:0.6rem">
+          <label style="flex:1;min-width:240px">Topic / Query / arXiv ID / URL
+            <input id="aq" placeholder="e.g. 1706.03762 or https://arxiv.org/abs/... or few-shot tuning">
+          </label>
+          <label>Max Papers
+            <input id="amax" type="number" min="1" max="50" value="5" style="width:90px">
+          </label>
+          <label style="flex-direction:row;align-items:center;gap:.4rem;padding-bottom:0.6rem">
+            <input type="checkbox" id="adl" checked>Download PDFs
+          </label>
+          <button class="btn" id="arxiv">Fetch & Index arXiv</button>
+        </div>
+
+        <hr style="border:0;border-top:1px solid var(--line);margin:1.4rem 0">
+
+        <h3>Upload Custom Academic PDF</h3>
+        <div class="row" style="margin-top:0.6rem">
+          <label>PDF Document<input id="pf" type="file" accept=".pdf"></label>
+          <label style="flex:1">Title (optional)<input id="pt" placeholder="Autonomous Few-Shot Adaptation"></label>
+          <label>Year (optional)<input id="py" type="number" value="2024" style="width:90px"></label>
+          <button class="btn" id="upload">Extract & Index</button>
+        </div>
+        <div id="pmsg"></div>
+      </div>
+
+      <div class="card">
+        <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:1rem;gap:0.8rem">
+          <h2 id="ptitle">Indexed Papers Library</h2>
+          <div style="display:flex;gap:0.6rem;align-items:center">
+            <button class="btn ghost danger" id="deleteAll" title="Delete all indexed papers and PDF files">Delete All PDFs</button>
+            <button class="btn ghost" id="refresh">Refresh Library</button>
+          </div>
+        </div>
+        <div id="libmsg"></div>
+        <div id="plist" class="muted">Loading papers...</div>
+      </div>
+    </section>
+
+    <!-- PANEL 2: RAG Q&A WITH CITATIONS -->
+    <section class="panel" id="ask">
+      <div class="card">
+        <span class="badge-pill">GROUNDED DENSE SEMANTIC RETRIEVAL</span>
+        <h2>Ask a Scientific Research Question</h2>
+        <p class="muted" style="margin-bottom:1rem">Answers are synthesized strictly from retrieved text chunks with
+          traceable <code style="color:var(--cyan)">[Paper, Year, Section]</code> citations to eliminate hallucination.
+        </p>
+
+        <!-- Active RAG Engine Status Strip (Controlled from Sidebar) -->
+        <div id="ask-engine-bar" style="margin-bottom:0.9rem;display:flex;align-items:center;justify-content:space-between;background:rgba(6,10,17,0.7);border:1px solid #162438;padding:8px 14px;border-radius:8px;font-size:0.83rem">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span id="ask-llm-dot" class="dot on" style="width:8px;height:8px"></span>
+            <span style="color:#cbd5e1">Active Generative Engine: <b id="ask-llm-txt" style="color:var(--cyan)">openai/gpt-oss-120b (GROQ)</b></span>
+          </div>
+          <span class="tag badge-cyan" style="margin:0;font-size:0.75rem;cursor:default" title="Switch provider or model in the left sidebar">⚡ Switch Engine in Sidebar</span>
+        </div>
+
+        <textarea id="q" placeholder="e.g. What are the key limitations of prompt-based few-shot learners?"></textarea>
+
+        <div class="row" style="margin-top:0.8rem;justify-content:flex-end">
+          <button class="btn" id="askbtn" style="padding:0.65rem 1.6rem;font-size:0.92rem">🔍 Ask Grounded RAG</button>
+        </div>
+        <div id="amsg"></div>
+      </div>
+      <div id="aout"></div>
+    </section>
+
+    <!-- PANEL 3: RESEARCH GAPS ANALYSIS -->
+    <section class="panel" id="gaps">
+      <div class="card">
+        <span class="badge-pill badge-cyan">UNSUPERVISED TOPIC CLUSTERING & MULTI-SIGNAL GAP FORMULA</span>
+        <h2>Identify Academic Research Gaps</h2>
+        <p class="muted" style="margin-bottom:1.2rem">
+          Papers are clustered into semantic embedding spaces. Each cluster is evaluated against 4 independent signals
+          to compute a normalized research gap frontier score:
+          <code
+            style="color:var(--cyan);background:#080d15;padding:2px 6px;border-radius:4px">GapScore = w1·Sparsity + w2·Decay + w3·Contradiction + w4·Admissions</code>
+        </p>
+
+        <div class="row" id="wrow"></div>
+
+        <div class="row" style="margin-top:1.2rem">
+          <label>Target Clusters (k)<input id="ncl" type="number" min="2" max="25" placeholder="Auto"
+              style="width:110px"></label>
+          <button class="btn" id="run">Run Gap Analysis</button>
+          <button class="btn ghost" id="latest">Load Latest Analysis</button>
+        </div>
+        <div id="gmsg"></div>
+      </div>
+      <div id="gout"></div>
+    </section>
+
+    <!-- PANEL 4: EVALUATION & BENCHMARKS -->
+    <section class="panel" id="eval">
+      <div class="card">
+        <div class="row" style="justify-content:space-between;align-items:center;margin-bottom:1rem">
+          <div>
+            <span class="badge-pill">VALIDATION METRICS</span>
+            <h2>System Performance & Expert Precision</h2>
+          </div>
+          <button class="btn ghost" id="mload">Refresh Metrics</button>
+        </div>
+        <div id="mout" class="muted">Loading system metrics...</div>
+      </div>
+
+      <div class="card">
+        <span class="badge-pill badge-cyan">CONTROLLED EXPERIMENT</span>
+        <h2>Dense RAG vs. Keyword Search Baseline</h2>
+        <p class="muted" style="margin-bottom:1rem">Compare how dense embeddings capture paraphrased semantic research
+          questions compared to standard exact-keyword retrieval.</p>
+        <div class="row">
+          <label style="flex:1;min-width:260px">Query
+            <input id="bq" value="What research gaps or unexplored areas are identified across the indexed research papers?"
+              placeholder="Enter research gap query (e.g. limitations, contradictions, methodologies)...">
+          </label>
+          <button class="btn" id="bcmp">Run Comparison</button>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          <span class="muted" style="font-size:0.78rem;align-self:center">Sample Benchmark Inquiries:</span>
+          <button type="button" class="tag" style="cursor:pointer;background:#0d1829;border:1px solid #1f3653;color:var(--cyan)" onclick="$('#bq').value='What research gaps or unexplored areas are identified across the indexed research papers?';$('#bcmp').click()">Research Gaps</button>
+          <button type="button" class="tag" style="cursor:pointer;background:#0d1829;border:1px solid #1f3653;color:var(--cyan)" onclick="$('#bq').value='What limitations do existing studies acknowledge, and which limitations remain unresolved?';$('#bcmp').click()">Limitations Analysis</button>
+          <button type="button" class="tag" style="cursor:pointer;background:#0d1829;border:1px solid #1f3653;color:var(--cyan)" onclick="$('#bq').value='Do the indexed papers report conflicting findings, conclusions, or experimental results on similar research problems?';$('#bcmp').click()">Contradiction Detection</button>
+          <button type="button" class="tag" style="cursor:pointer;background:#0d1829;border:1px solid #1f3653;color:var(--cyan)" onclick="$('#bq').value='How has research on a particular topic evolved over time, and which areas remain insufficiently explored?';$('#bcmp').click()">Temporal Trends</button>
+          <button type="button" class="tag" style="cursor:pointer;background:#0d1829;border:1px solid #1f3653;color:var(--cyan)" onclick="$('#bq').value='What methods, datasets, evaluation metrics, or experimental settings are missing or insufficiently investigated?';$('#bcmp').click()">Methodological Gaps</button>
+          <button type="button" class="tag" style="cursor:pointer;background:#0d1829;border:1px solid #1f3653;color:var(--cyan)" onclick="$('#bq').value='What limitations or missing research directions become apparent when comparing findings across multiple papers?';$('#bcmp').click()">Cross-Paper Comparison</button>
+        </div>
+        <div id="bout"></div>
+      </div>
+    </section>
+  </main>
+  </div> <!-- /.main-wrapper -->
+  </div> <!-- /.app-layout -->
+
+  <!-- API Keys Management Modal -->
+  <div id="keys-modal" class="modal-overlay" style="display:none">
+    <div class="modal-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <h3 style="margin:0;font-size:1.1rem;color:#fff">⚙️ Configure API Keys</h3>
+        <button type="button" class="btn ghost" id="btn-close-keys" style="padding:2px 8px;font-size:0.85rem">✕</button>
+      </div>
+      <p class="muted" style="font-size:0.82rem;margin-bottom:1rem;line-height:1.45">
+        Configure API keys for cloud providers. Keys are persisted locally to your backend <code>.env</code> file.
+      </p>
+      
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <label>Groq API Key (Free & Ultra-Fast)
+          <input id="key-groq" type="password" placeholder="Enter Groq Key (starts with gsk_...)">
+        </label>
+        <label>Google Gemini API Key (Free Tier)
+          <input id="key-gemini" type="password" placeholder="Enter Gemini Key (starts with AIza...)">
+        </label>
+        <label>OpenAI API Key
+          <input id="key-openai" type="password" placeholder="Enter OpenAI Key (starts with sk-...)">
+        </label>
+      </div>
+      <div id="keys-msg" style="margin-top:10px"></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:14px">
+        <button type="button" class="btn ghost" id="btn-cancel-keys">Cancel</button>
+        <button type="button" class="btn" id="btn-save-keys">Save & Apply Keys</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <script>
+    const $ = s => document.querySelector(s);
+    const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    if (typeof window !== "undefined" && window.location && window.location.protocol.startsWith("http")) {
+      const baseEl = $("#base");
+      if (baseEl && baseEl.value && baseEl.value.includes("127.0.0.1:8000")) {
+        baseEl.value = window.location.origin + "/api";
+      }
+    }
+    const base = () => $("#base").value.replace(/\/+$/, "");
+
+    async function api(path, opt = {}) {
+      let r;
+      try {
+        r = await fetch(base() + path, opt);
+      } catch (e) {
+        throw new Error("Cannot reach backend at " + base() + ". Please ensure 'python run.py' is running on port 8000.");
+      }
+      if (!r.ok) {
+        let d = "";
+        try {
+          const j = await r.json();
+          d = typeof j.detail === "string" ? j.detail : JSON.stringify(j.detail);
+        } catch { }
+        throw new Error(d || ("Request failed with status " + r.status));
+      }
+      const ct = r.headers.get("content-type") || "";
+      return ct.includes("json") ? r.json() : r.text();
+    }
+
+    const post = (p, b) => api(p, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(b) });
+
+    function msg(el, text, kind = "") {
+      $(el).innerHTML = text ? `<div class="msg ${kind}" role="status">${esc(text)}</div>` : "";
+    }
+
+    async function busy(btn, el, fn, label) {
+      const b = $(btn), t = b.textContent;
+      b.disabled = true;
+      if (label) b.textContent = label;
+      msg(el, "");
+      try {
+        await fn();
+      } catch (e) {
+        msg(el, e.message, "err");
+      } finally {
+        b.disabled = false;
+        b.textContent = t;
+      }
+    }
+
+    /* Toast notifications */
+    function showToast(text, type = "ok") {
+      const container = $("#toast-container");
+      if (!container) return;
+      const t = document.createElement("div");
+      t.className = `toast ${type}`;
+      t.innerHTML = `<span>${type === 'err' ? '⚠️' : '⚡'}</span> <span>${esc(text)}</span>`;
+      container.appendChild(t);
+      setTimeout(() => {
+        t.style.opacity = '0';
+        t.style.transform = 'translateY(8px)';
+        t.style.transition = 'all 0.3s ease';
+        setTimeout(() => t.remove(), 300);
+      }, 3500);
+    }
+
+    /* Tabs switcher */
+    function switchTab(t) {
+      document.querySelectorAll(".sidebar-tab-btn, nav button").forEach(x => {
+        const isMatch = x.dataset.t === t;
+        x.setAttribute("aria-selected", isMatch);
+        x.classList.toggle("active", isMatch);
+      });
+      document.querySelectorAll(".panel").forEach(p => p.classList.toggle("on", p.id === t));
+      if (t === "eval") loadMetrics();
+      if (t === "ask") checkLLMStatus();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const sb = $("#app-sidebar");
+      if (sb) sb.classList.remove("mobile-open");
+    }
+
+    document.querySelectorAll(".sidebar-tab-btn, nav button").forEach(b => b.onclick = () => {
+      switchTab(b.dataset.t);
+    });
+
+    const sidebarToggleBtn = $("#sidebar-toggle-btn");
+    if (sidebarToggleBtn) {
+      sidebarToggleBtn.onclick = () => {
+        const sb = $("#app-sidebar");
+        if (sb) sb.classList.toggle("mobile-open");
+      };
+    }
+
+    /* Supported Models Mapping (Provider -> Models) */
+    const PROVIDER_MODELS = {
+      groq: [
+        { id: "openai/gpt-oss-120b", name: "GPT-OSS 120B (Recommended)" },
+        { id: "qwen/qwen3.8-27b", name: "Qwen 3.8 27B" },
+        { id: "openai/gpt-oss-20b", name: "GPT-OSS 20B" },
+        { id: "llama-3.3-70b-versatile", name: "Llama 3.3 70B Versatile" },
+        { id: "llama-3.1-8b-instant", name: "Llama 3.1 8B Instant" },
+        { id: "mixtral-8x7b-32768", name: "Mixtral 8x7B" }
+      ],
+      openai: [
+        { id: "gpt-4o-mini", name: "GPT-4o Mini (Default)" },
+        { id: "gpt-4o", name: "GPT-4o" },
+        { id: "gpt-4-turbo", name: "GPT-4 Turbo" },
+        { id: "gpt-3.5-turbo", name: "GPT-3.5 Turbo" }
+      ],
+      gemini: [
+        { id: "gemini-3.5-flash", name: "Gemini 3.5 Flash (Recommended)" },
+        { id: "gemini-3-flash-preview", name: "Gemini 3.0 Flash Preview" },
+        { id: "gemini-flash-latest", name: "Gemini Flash Latest" },
+        { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro" }
+      ],
+      anthropic: [
+        { id: "claude-3-5-sonnet-20241022", name: "Claude 3.5 Sonnet (Default)" },
+        { id: "claude-3-5-haiku-20241022", name: "Claude 3.5 Haiku" },
+        { id: "claude-3-opus-20240229", name: "Claude 3 Opus" }
+      ],
+      ollama: [
+        { id: "llama3", name: "Llama 3 (Local)" },
+        { id: "mistral", name: "Mistral (Local)" },
+        { id: "qwen2.5", name: "Qwen 2.5 (Local)" },
+        { id: "phi3", name: "Phi-3 (Local)" }
+      ],
+      mock: [
+        { id: "offline-heuristic", name: "Offline Heuristic Fallback" }
+      ]
+    };
+
+    function populateModelDropdown(provider, activeModel = null) {
+      const select = $("#llm-model-select");
+      if (!select) return;
+      select.innerHTML = "";
+      const models = PROVIDER_MODELS[provider] || PROVIDER_MODELS.mock;
+      models.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m.id;
+        opt.textContent = m.name;
+        select.appendChild(opt);
+      });
+      if (activeModel) {
+        select.value = activeModel;
+      }
+      if (!select.value && select.options.length) {
+        select.selectedIndex = 0;
+      }
+    }
+
+    /* Check LLM Provider and sync AI Model Settings */
+    async function checkLLMStatus() {
+      try {
+        const s = await api("/rag/llm-status");
+        const sDot = $("#sidebar-dot");
+        const sLabel = $("#sidebar-engine-label");
+        const provSelect = $("#llm-provider-select");
+        const modelSelect = $("#llm-model-select");
+        const keyWarning = $("#sidebar-key-warning");
+        const askDot = $("#ask-llm-dot");
+        const askTxt = $("#ask-llm-txt");
+        const mobPill = $("#mobile-engine-pill");
+
+        const isGen = s.is_generative;
+        const prov = (s.provider || "groq").toLowerCase();
+        const model = s.model || "";
+        const hasKey = s.has_key !== false;
+        const warning = s.missing_key_warning;
+
+        // Sync Provider dropdown
+        if (provSelect && document.activeElement !== provSelect) {
+          provSelect.value = prov;
+        }
+
+        // Sync Model dropdown
+        if (modelSelect && document.activeElement !== modelSelect) {
+          populateModelDropdown(prov, model);
+        }
+
+        // Sidebar Status Indicator & Label
+        if (sDot) {
+          sDot.className = "dot " + (hasKey && isGen ? "on" : (isGen ? "warn" : "off"));
+        }
+        if (sLabel) {
+          sLabel.innerHTML = isGen
+            ? `Active: <b style="color:var(--cyan)">${esc(prov.toUpperCase())}</b> <span style="font-size:0.73rem;color:#94a3b8">(${esc(model)})</span>`
+            : `<span style="color:var(--warn)">Offline Extractive Engine</span>`;
+        }
+
+        // Key Warning box
+        if (keyWarning) {
+          if (warning) {
+            keyWarning.style.display = "block";
+            keyWarning.innerHTML = `⚠️ <b>${esc(warning)}</b>`;
+          } else {
+            keyWarning.style.display = "none";
+          }
+        }
+
+        // RAG Panel Status Bar
+        if (askDot) {
+          askDot.className = "dot " + (hasKey && isGen ? "on" : "off");
+        }
+        if (askTxt) {
+          if (warning) {
+            askTxt.innerHTML = `<span style="color:var(--warn)">${esc(model)} (${esc(prov.toUpperCase())}) — ${esc(warning)}</span>`;
+          } else {
+            askTxt.innerHTML = isGen
+              ? `<span style="color:var(--cyan)">${esc(model)}</span> (${esc(prov.toUpperCase())})`
+              : `<span style="color:var(--warn)">Offline Extractive Heuristic</span>`;
+          }
+        }
+
+        if (mobPill) {
+          mobPill.textContent = `${prov.toUpperCase()}: ${model.split('/').pop().substring(0, 14)}`;
+        }
+      } catch (e) {
+        console.error("Could not verify LLM status", e);
+      }
+    }
+
+    /* Switch Provider Event */
+    const provSelect = $("#llm-provider-select");
+    if (provSelect) {
+      provSelect.onchange = async function() {
+        const newProv = this.value;
+        populateModelDropdown(newProv);
+        const newModel = $("#llm-model-select").value;
+
+        showToast(`Switching provider to ${newProv.toUpperCase()}...`);
+        try {
+          const res = await post("/rag/llm-config", { provider: newProv, model: newModel });
+          showToast(res.status_message || `Active Engine: ${newProv.toUpperCase()} (${newModel})`, "ok");
+          await checkLLMStatus();
+        } catch (err) {
+          showToast(err.message || "Failed to switch provider", "err");
+          await checkLLMStatus();
+        }
+      };
+    }
+
+    /* Switch Model Event */
+    const modelSelect = $("#llm-model-select");
+    if (modelSelect) {
+      modelSelect.onchange = async function() {
+        const prov = $("#llm-provider-select").value;
+        const newModel = this.value;
+
+        showToast(`Switching model to ${newModel}...`);
+        try {
+          const res = await post("/rag/llm-config", { provider: prov, model: newModel });
+          showToast(res.status_message || `Model updated: ${newModel}`, "ok");
+          await checkLLMStatus();
+        } catch (err) {
+          showToast(err.message || "Failed to switch model", "err");
+          await checkLLMStatus();
+        }
+      };
+    }
+
+    /* Modal for API Keys */
+    const openKeysBtn = $("#btn-open-keys");
+    if (openKeysBtn) {
+      openKeysBtn.onclick = () => {
+        $("#keys-modal").style.display = "flex";
+        $("#key-groq").value = "";
+        $("#key-gemini").value = "";
+        $("#key-openai").value = "";
+        $("#keys-msg").innerHTML = "";
+      };
+    }
+
+    const closeKeysBtn = $("#btn-close-keys");
+    if (closeKeysBtn) closeKeysBtn.onclick = () => { $("#keys-modal").style.display = "none"; };
+    const cancelKeysBtn = $("#btn-cancel-keys");
+    if (cancelKeysBtn) cancelKeysBtn.onclick = () => { $("#keys-modal").style.display = "none"; };
+
+    const saveKeysBtn = $("#btn-save-keys");
+    if (saveKeysBtn) {
+      saveKeysBtn.onclick = () => busy("#btn-save-keys", "#keys-msg", async () => {
+        const gKey = $("#key-groq").value.trim();
+        const gemKey = $("#key-gemini").value.trim();
+        const oKey = $("#key-openai").value.trim();
+
+        if (!gKey && !gemKey && !oKey) {
+          throw new Error("Please enter at least one API key to save.");
+        }
+
+        let updated = [];
+        if (gKey) {
+          await post("/rag/llm-config", { provider: "groq", api_key: gKey });
+          updated.push("Groq");
+        }
+        if (gemKey) {
+          await post("/rag/llm-config", { provider: "gemini", api_key: gemKey });
+          updated.push("Gemini");
+        }
+        if (oKey) {
+          await post("/rag/llm-config", { provider: "openai", api_key: oKey });
+          updated.push("OpenAI");
+        }
+
+        msg("#keys-msg", `${updated.join(", ")} key(s) updated successfully!`, "ok");
+        showToast(`Saved ${updated.join(", ")} API Key(s)!`, "ok");
+        await checkLLMStatus();
+        setTimeout(() => { $("#keys-modal").style.display = "none"; }, 1200);
+      }, "Saving Keys...");
+    }
+
+    /* Ping connection */
+    async function ping() {
+      const d = $("#dot");
+      try {
+        const r = await fetch(base().replace(/\/api$/, "") + "/");
+        d.className = "dot " + (r.ok ? "on" : "off");
+      } catch {
+        d.className = "dot off";
+      }
+      checkLLMStatus();
+    }
+    $("#ping").onclick = () => { ping(); loadPapers(); };
+
+    /* Papers Management */
+    async function loadPapers() {
+      try {
+        const d = await api("/papers?limit=500");
+        $("#ptitle").textContent = `Indexed Papers Library (${d.total})`;
+        $("#plist").innerHTML = d.papers.length ? d.papers.map(p => `
+      <div class="paper">
+        <div style="flex:1">
+          <b style="font-size:1.02rem;color:#fff">${esc(p.title)}</b>
+          <p>${esc((p.authors || []).slice(0, 4).join(", "))}${p.authors && p.authors.length > 4 ? " et al." : ""}</p>
+          <div style="margin-top:0.4rem;display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center">
+            <span class="tag">${esc(p.year || "n/a")}</span>
+            <span class="tag">${p.total_chunks} chunks</span>
+            <span class="tag">${p.citation_count} citations</span>
+            ${p.pdf_path ? `<a href="/api/papers/${encodeURIComponent(p.paper_id)}/pdf" target="_blank" rel="noopener" class="tag" style="color:var(--emerald);text-decoration:none" title="${esc(p.pdf_path)}">Local PDF 📄</a>` : ""}
+            ${p.url ? `<a href="${esc(p.url)}" target="_blank" rel="noopener" class="tag" style="color:var(--cyan);text-decoration:none">arXiv source ↗</a>` : ""}
+          </div>
+          <details><summary>View Abstract</summary><p style="color:#cbd5e1;line-height:1.5">${esc(p.abstract)}</p></details>
+        </div>
+        <button class="btn ghost danger" data-del="${esc(p.paper_id)}" style="align-self:flex-start;padding:0.4rem 0.8rem;font-size:0.75rem">Delete</button>
+      </div>`).join("")
+          : '<span class="muted">No papers ingested yet. Click "Seed Benchmark Corpus" above to get started immediately.</span>';
+      } catch (e) {
+        $("#plist").innerHTML = `<div class="msg err">${esc(e.message)}</div>`;
+      }
+    }
+
+    $("#plist").onclick = async e => {
+      const id = e.target.dataset.del;
+      if (!id || !confirm("Delete this paper and its indexed embedding chunks?")) return;
+      try {
+        let res;
+        try {
+          res = await api("/papers/" + encodeURIComponent(id), { method: "DELETE" });
+        } catch {
+          res = await api("/papers/" + encodeURIComponent(id) + "/delete", { method: "POST" });
+        }
+        msg("#libmsg", (res && res.message) || "Paper deleted.", "ok");
+        loadPapers();
+      } catch (err) {
+        msg("#libmsg", err.message, "err");
+      }
+    };
+
+    $("#deleteAll").onclick = async () => {
+      if (!confirm("Are you sure you want to delete ALL indexed papers and PDF files from the backend? This will remove all physical PDF documents, clear the library, and reset the vector store.")) return;
+      busy("#deleteAll", "#libmsg", async () => {
+        let d;
+        try {
+          d = await api("/papers/delete-all", { method: "POST" });
+        } catch (e1) {
+          try {
+            d = await api("/papers", { method: "DELETE" });
+          } catch (e2) {
+            try {
+              d = await api("/papers", { method: "POST" });
+            } catch (e3) {
+              d = await api("/sample/clear", { method: "POST" });
+            }
+          }
+        }
+        msg("#libmsg", (d && d.message) || "All papers and PDF files deleted successfully from backend.", "ok");
+        if ($("#pf")) $("#pf").value = "";
+        if ($("#pmsg")) $("#pmsg").innerHTML = "";
+        loadPapers();
+      }, "Deleting all...");
+    };
+
+    $("#refresh").onclick = loadPapers;
+
+    $("#loadSample").onclick = () => busy("#loadSample", "#pmsg", async () => {
+      const d = await post("/sample/load", {});
+      msg("#pmsg", d.message + ` Library now contains ${d.total_papers_in_db} papers and ${d.total_chunks_in_vector_store} vectors.`, "ok");
+      loadPapers();
+    }, "Indexing Embeddings (first run loads MiniLM)...");
+
+    $("#arxiv").onclick = () => busy("#arxiv", "#pmsg", async () => {
+      const q = $("#aq").value.trim();
+      if (!q) throw new Error("Enter a topic or query to search on arXiv.");
+      const d = await post("/papers/search-arxiv", { query: q, max_results: +$("#amax").value || 5, download_pdfs: $("#adl").checked });
+      msg("#pmsg", `Successfully added ${d.length} papers from arXiv with dense embeddings.`, "ok");
+      loadPapers();
+    }, "Querying arXiv...");
+
+    $("#upload").onclick = () => busy("#upload", "#pmsg", async () => {
+      const f = $("#pf").files[0];
+      if (!f) throw new Error("Choose a PDF file to upload.");
+      const fd = new FormData();
+      fd.append("file", f);
+      if ($("#pt").value) fd.append("title", $("#pt").value);
+      if ($("#py").value) fd.append("year", $("#py").value);
+      const d = await api("/papers/upload", { method: "POST", body: fd });
+      msg("#pmsg", `Uploaded and sectioned "${d.title}" into ${d.total_chunks} chunks.`, "ok");
+      loadPapers();
+    }, "Extracting & Embedding...");
+
+    /* Ask Grounded RAG */
+    $("#askbtn").onclick = () => busy("#askbtn", "#amsg", async () => {
+      const question = ($("#q").value || "").trim();
+      if (!question) {
+        msg("#amsg", "Please enter a specific research question. Empty or whitespace-only queries cannot be processed.", "err");
+        return;
+      }
+      if (question.length < 3) {
+        msg("#amsg", "Question is too brief. Please enter a more descriptive research question or topic.", "err");
+        return;
+      }
+      const body = { question, top_k: ($("#topk") && +$("#topk").value) || 5 };
+      if ($("#ymin") && $("#ymin").value) body.filter_year_min = +$("#ymin").value;
+      if ($("#ymax") && $("#ymax").value) body.filter_year_max = +$("#ymax").value;
+      const s = $("#secs") ? $("#secs").value.split(",").map(x => x.trim()).filter(Boolean) : [];
+      if (s.length) body.filter_sections = s;
+      const d = await post("/rag/ask", body);
+
+      const formattedAnswer = esc(d.answer || "").replace(/\n\n/g, "<br><br>").replace(/\n/g, "<br>");
+
+      $("#aout").innerHTML = `
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <div>
+          <h2>LLM Generated Answer</h2>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap">
+            <span class="tag" style="background:#091322;border:1px solid #1c3554;color:var(--cyan)">
+              ${d.llm_provider ? 'Model: ' + esc(d.llm_provider.toUpperCase()) + (d.llm_model ? ' (' + esc(d.llm_model) + ')' : '') : 'Synthesized Answer'}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="answer" style="font-size:1.02rem;line-height:1.75;color:#f1f5f9;background:rgba(10,18,30,0.6);border:1px solid #142234;border-radius:8px;padding:16px 20px">${formattedAnswer}</div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h3 style="margin:0;font-size:1.15rem;color:#fff">Citations (${d.citations ? d.citations.length : 0})</h3>
+        <span class="tag badge-cyan">References</span>
+      </div>
+      <p class="muted" style="margin-bottom:14px;font-size:0.83rem">Source papers and section references cited in the answer:</p>
+      ${d.citations && d.citations.length ? `
+        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(320px, 1fr));gap:12px">
+          ${d.citations.map((c, i) => `
+            <div style="background:#060a10;border:1px solid #142132;border-radius:8px;padding:12px 14px">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                <span style="color:var(--pri);font-weight:700;font-size:0.85rem">[${i + 1}]</span>
+                <span class="tag badge-cyan">${esc(c.section_name || 'general')}</span>
+              </div>
+              <div style="color:#fff;font-weight:600;font-size:0.92rem;margin-bottom:4px">
+                ${esc(c.paper_title)}
+                ${c.paper_id ? `<a href="/api/papers/${encodeURIComponent(c.paper_id)}/pdf" target="_blank" rel="noopener" class="tag" style="color:var(--emerald);text-decoration:none;font-size:0.7rem;margin-left:6px" title="Open PDF">📄 PDF</a>` : ''}
+              </div>
+              <div style="font-size:0.75rem;color:var(--mute);margin-bottom:8px">Published: ${esc(c.year || "n/a")}</div>
+              ${c.quote ? `<blockquote style="margin:0;font-size:0.82rem;color:#94a3b8;font-style:italic;border-left:2px solid var(--cyan);padding-left:8px;line-height:1.4">"${esc(c.quote)}"</blockquote>` : ''}
+            </div>
+          `).join("")}
+        </div>
+      ` : '<span class="muted">No citations available.</span>'}
+    </div>`;
+    }, "Synthesizing Grounded Answer...");
+
+    /* Research Gaps Analysis */
+    const SIG = [
+      ["sparsity", "Semantic Sparsity", "--s1"],
+      ["decay", "Temporal Decay", "--s2"],
+      ["contradiction", "Contradiction Density", "--s3"],
+      ["admission", "Author Admission", "--s4"]
+    ];
+
+    $("#wrow").innerHTML = SIG.map(([k, n]) => `
+  <label style="flex:1;min-width:180px">${n}: <b id="wv_${k}" style="color:var(--cyan)">0.25</b>
+    <input type="range" id="w_${k}" min="0" max="1" step="0.05" value="0.25">
+  </label>`).join("");
+
+    SIG.forEach(([k]) => $("#w_" + k).oninput = e => $("#wv_" + k).textContent = (+e.target.value).toFixed(2));
+
+    let CL = [];
+
+    function renderGaps(list, meta) {
+      CL = list;
+      if (!list || !list.length) {
+        $("#gout").innerHTML = '<div class="card muted">No clusters found. Ensure you have ingested papers and click "Run Gap Analysis".</div>';
+        return;
+      }
+      const xs = list.map(c => c.pca_x), ys = list.map(c => c.pca_y);
+      const [x0, x1] = [Math.min(...xs), Math.max(...xs)], [y0, y1] = [Math.min(...ys), Math.max(...ys)];
+      const sx = v => 45 + (x1 === x0 ? 0.5 : (v - x0) / (x1 - x0)) * 610;
+      const sy = v => 235 - (y1 === y0 ? 0.5 : (v - y0) / (y1 - y0)) * 190;
+      const mx = Math.max(...list.map(c => c.paper_count));
+      const col = g => `hsl(${(1 - g) * 200 + 10} 75% 50%)`;
+
+      const dots = list.map((c, i) => `
+    <g class="cl" data-i="${i}" tabindex="0">
+      <circle cx="${sx(c.pca_x)}" cy="${sy(c.pca_y)}" r="${14 + 18 * c.paper_count / mx}" fill="${col(c.gap_score)}" fill-opacity=".85" stroke="#162536" stroke-width="2"/>
+      <text x="${sx(c.pca_x)}" y="${sy(c.pca_y) + 4}" text-anchor="middle" style="fill:#fff;font-weight:700;font-size:12px">${i + 1}</text>
+    </g>`).join("");
+
+      const cards = list.map((c, i) => `
+    <div class="card" id="cl${i}">
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div>
+          <span class="badge-pill" style="font-size:0.7rem">CLUSTER #${i + 1}</span>
+          <h3 style="font-size:1.25rem;color:#fff">${esc(c.topic_title)}</h3>
+          <span class="muted">${c.paper_count} Papers in Cluster • PCA: (${c.pca_x.toFixed(2)}, ${c.pca_y.toFixed(2)})</span>
+        </div>
+        <div style="text-align:right">
+          <div class="score" title="Composite Research Gap Score">${c.gap_score.toFixed(3)}</div>
+          <span style="font-size:0.72rem;color:var(--dim);text-transform:uppercase">Gap Score</span>
+        </div>
+      </div>
+
+      <div class="bars">
+        ${SIG.map(([k, n, v]) => `
+          <span style="color:var(--mute)">${n}</span>
+          <div class="bar"><i style="width:${(c[k + "_score"] * 100).toFixed(0)}%;background:var(${v})"></i></div>
+          <span style="font-family:var(--font-mono);color:#fff">${c[k + "_score"].toFixed(2)}</span>`).join("")}
+      </div>
+
+      <div style="background:rgba(56, 189, 248, 0.05);border:1px solid rgba(56, 189, 248, 0.2);border-radius:6px;padding:12px;margin:12px 0">
+        <b style="color:var(--cyan);font-size:0.85rem">Suggested Next Direction:</b>
+        <p style="color:#e2e8f0;margin-top:4px;font-size:0.9rem">${esc(c.suggested_directions)}</p>
+      </div>
+
+      <details>
+        <summary>Extracted Evidence Quotes & Limitations (${c.evidence_quotes.length})</summary>
+        ${c.evidence_quotes.map(q => `
+          <blockquote>
+            "${esc(q.quote)}"<br>
+            <span class="muted" style="font-size:0.78rem">📄 ${esc(q.paper_title)} (${esc(q.year || "n/a")}) • Section: ${esc(q.section_name)} • Signal: ${esc(q.signal_type)}</span>
+          </blockquote>`).join("") || '<span class="muted">No direct limitation quotes extracted.</span>'}
+      </details>
+
+      <details>
+        <summary>Constituent Papers (${c.paper_titles.length})</summary>
+        <ul style="padding-left:1.2rem;margin-top:0.4rem;color:#cbd5e1;font-size:0.88rem">
+          ${c.paper_titles.map(t => `<li>${esc(t)}</li>`).join("")}
+        </ul>
+      </details>
+
+      <div class="row" style="margin-top:1.2rem;padding-top:12px;border-top:1px solid var(--line);align-items:center">
+        <span class="muted">Expert Review:</span>
+        <button class="btn ghost" data-fb="genuine" data-id="${c.cluster_id}">✓ Genuine Gap</button>
+        <button class="btn ghost" data-fb="already_studied" data-id="${c.cluster_id}">✕ Already Studied</button>
+        <button class="btn ghost" data-fb="unclear" data-id="${c.cluster_id}">? Unclear</button>
+        <button class="btn ghost" data-rep="${c.cluster_id}" style="margin-left:auto">Download Markdown Report</button>
+      </div>
+      <div class="fb" style="margin-top:8px"></div>
+    </div>`).join("");
+
+      $("#gout").innerHTML = `
+    <div class="card">
+      <h2>Frontier Semantic 2D Map</h2>
+      <p class="muted" style="margin-bottom:12px">${meta || ""}Bubble size reflects paper density; redder indicates higher research gap urgency. Click a cluster bubble to inspect details.</p>
+      <svg class="map" viewBox="0 0 700 280" role="img" aria-label="2D Map of Paper Clusters">${dots}</svg>
+    </div>
+    ${cards}`;
+    }
+
+    $("#gout").onclick = async e => {
+      const g = e.target.closest(".cl");
+      if (g) {
+        const el = $("#cl" + g.dataset.i);
+        el.scrollIntoView({ behavior: "smooth" });
+        el.style.borderColor = "var(--cyan)";
+        setTimeout(() => el.style.borderColor = "var(--line)", 2000);
+        return;
+      }
+      const fb = e.target.dataset.fb, rep = e.target.dataset.rep;
+      if (fb) {
+        const card = e.target.closest(".card").querySelector(".fb");
+        try {
+          const d = await post("/evaluation/expert-feedback", {
+            cluster_record_id: +e.target.dataset.id,
+            rating: fb,
+            expert_name: "Domain Reviewer"
+          });
+          card.innerHTML = `<div class="msg ok">${esc(d.message)} Current precision: ${(d.current_precision * 100).toFixed(1)}% across ${d.total_rated} expert ratings.</div>`;
+        } catch (err) {
+          card.innerHTML = `<div class="msg err">${esc(err.message)}</div>`;
+        }
+      }
+      if (rep) {
+        try {
+          const t = await api(`/gaps/report/${rep}?format=markdown`);
+          const a = document.createElement("a");
+          a.href = URL.createObjectURL(new Blob([t], { type: "text/markdown" }));
+          a.download = `gap-report-${rep}.md`;
+          a.click();
+          URL.revokeObjectURL(a.href);
+        } catch (err) {
+          msg("#gmsg", err.message, "err");
+        }
+      }
+    };
+
+    $("#run").onclick = () => busy("#run", "#gmsg", async () => {
+      const weights = {};
+      SIG.forEach(([k]) => weights["w_" + k] = +$("#w_" + k).value);
+      const body = { weights };
+      if ($("#ncl").value) body.num_clusters = +$("#ncl").value;
+      const d = await post("/gaps/analyze", body);
+      renderGaps(d.ranked_gaps, `Analyzed ${d.total_papers} papers into ${d.num_clusters} clusters. `);
+    }, "Computing Clustering & Multi-Signals...");
+
+    $("#latest").onclick = () => busy("#latest", "#gmsg", async () => {
+      const data = await api("/gaps/clusters");
+      renderGaps(data, "Loaded latest persistent run. ");
+    });
+
+    /* System Evaluation */
+    async function loadMetrics() {
+      try {
+        const m = await api("/evaluation/metrics");
+        const pc = v => v == null ? "n/a" : (v * 100).toFixed(1) + "%";
+        const br = Object.entries(m.validation_breakdown || {}).map(([k, v]) => `${esc(k)}: ${v}`).join(" • ") || "No expert reviews recorded yet";
+
+        const benchRows = (m.benchmark_details || []).map(b => `
+          <tr style="border-bottom:1px solid #141f2e;font-size:0.82rem">
+            <td style="padding:8px;font-family:monospace;color:var(--cyan);font-weight:700">${esc(b.id)}</td>
+            <td style="padding:8px">
+              <b style="color:#fff">${esc(b.category)}</b>
+              <div class="muted" style="font-size:0.77rem;margin-top:2px">${esc(b.question)}</div>
+            </td>
+            <td style="padding:8px;text-align:center">${b.relevant_chunks_in_corpus}</td>
+            <td style="padding:8px;text-align:center;color:var(--cyan);font-weight:700">${b.retrieved_relevant_top5}</td>
+            <td style="padding:8px;text-align:center;color:var(--cyan);font-weight:700">${b.retrieved_relevant_top10}</td>
+            <td style="padding:8px;text-align:center">${b.multi_paper_supported ? '<span style="color:var(--cyan)">' + b.distinct_papers_retrieved + ' papers</span>' : '<span class="muted">Single</span>'}</td>
+            <td style="padding:8px;font-size:0.77rem">
+              ${b.status === 'evaluated' ? '<span style="color:var(--ok)">✓ Evaluated</span>' : '<span style="color:#f59e0b">⚠ Insufficient Evidence</span>'}
+              <div class="muted" style="font-size:0.72rem;margin-top:2px">${esc(b.explanation || '')}</div>
+            </td>
+          </tr>
+        `).join("");
+
+        const benchTableHtml = benchRows ? `
+      <details style="margin-top:16px;background:#05080e;padding:12px 14px;border-radius:8px;border:1px solid #141f2e" open>
+        <summary style="cursor:pointer;color:var(--cyan);font-weight:600;font-size:0.9rem">
+          Evidence-Grounded Multi-Paper Research Gap Benchmark Suite (${(m.benchmark_details || []).length} Inquiries)
+        </summary>
+        <p class="muted" style="margin:8px 0 12px 0;font-size:0.78rem">
+          Measures evidence passage retrieval, multi-paper support, and cross-paper grounding across all 10 research gap inquiries. Questions without matching corpus evidence are explicitly flagged.
+        </p>
+        <div style="overflow-x:auto">
+          <table style="width:100%;border-collapse:collapse;text-align:left">
+            <thead>
+              <tr style="border-bottom:2px solid #1e293b;color:#94a3b8;font-size:0.75rem;text-transform:uppercase">
+                <th style="padding:6px 8px">ID</th>
+                <th style="padding:6px 8px">Benchmark Category & Question</th>
+                <th style="padding:6px 8px;text-align:center">Corpus Evidence Chunks</th>
+                <th style="padding:6px 8px;text-align:center">Top-5 Hits</th>
+                <th style="padding:6px 8px;text-align:center">Top-10 Hits</th>
+                <th style="padding:6px 8px;text-align:center">Multi-Paper</th>
+                <th style="padding:6px 8px">Evaluation Status & Verification</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${benchRows}
+            </tbody>
+          </table>
+        </div>
+      </details>` : '';
+
+        $("#mout").className = "";
+        $("#mout").innerHTML = `
+      <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+        <div class="stat"><span class="muted">Indexed Papers</span><b>${m.total_papers}</b></div>
+        <div class="stat"><span class="muted">Vector Chunks</span><b>${m.total_chunks}</b></div>
+        <div class="stat"><span class="muted">Question Coverage@5</span><b style="color:var(--cyan)">${pc(m.question_coverage_at_5)}</b></div>
+        <div class="stat"><span class="muted">Evidence Faithfulness</span><b style="color:var(--ok)">${m.answer_faithfulness_rate != null ? pc(m.answer_faithfulness_rate) : '<span class="muted">Pending Queries</span>'}</b></div>
+        <div class="stat"><span class="muted">Conservative Precision</span><b style="color:var(--pri)">${pc(m.expert_gap_precision)}</b></div>
+        <div class="stat"><span class="muted">Strict Precision</span><b style="color:var(--pri)">${pc(m.strict_expert_precision)}</b></div>
+      </div>
+      <div style="margin-top:14px;padding:10px;background:#05080e;border:1px solid #141f2e;border-radius:6px;font-size:0.8rem;line-height:1.5">
+        <div><b style="color:#fff">Expert Validation:</b> ${m.total_expert_validations} expert feedback assessments (${br}). Conservative precision penalizes unclear ratings; strict precision evaluates decisive judgments.</div>
+        <div style="margin-top:4px"><b style="color:#fff">Faithfulness Source:</b> ${esc(m.faithfulness_explanation || 'Measured live against citation-to-passage grounding.')}</div>
+      </div>
+      ${benchTableHtml}`;
+      } catch (e) {
+        $("#mout").innerHTML = `<div class="msg err">${esc(e.message)}</div>`;
+      }
+    }
+
+    $("#mload").onclick = loadMetrics;
+
+    $("#bcmp").onclick = () => busy("#bcmp", "#bout", async () => {
+      const q = $("#bq").value.trim();
+      if (!q) throw new Error("Enter a research query for comparison.");
+      const d = await api("/evaluation/baseline-comparison?question=" + encodeURIComponent(q), { method: "POST" });
+      const li = a => a.map(r => `
+    <div class="paper" style="display:block;background:#05080e;padding:10px;border-radius:6px;border:1px solid #141f2e;margin-bottom:6px">
+      <b style="color:#fff;font-size:0.88rem">${esc(r.title)}</b>
+      <p style="font-size:0.8rem">${esc(r.section)}${r.score != null ? ' • score ' + r.score.toFixed(3) : ''}</p>
+    </div>`).join("") || '<span class="muted">No matches returned.</span>';
+
+      $("#bout").innerHTML = `
+    <div class="cols" style="margin-top:1.2rem">
+      <div>
+        <h3 style="color:var(--cyan)">✓ Dense Semantic Retrieval (Our System)</h3>
+        ${li(d.dense_rag_results)}
+      </div>
+      <div>
+        <h3 style="color:var(--pri)">✕ Keyword Search Baseline</h3>
+        ${li(d.plain_keyword_results)}
+      </div>
+    </div>
+    <p class="muted" style="margin-top:12px">${esc(d.comparison_notes)}</p>`;
+    }, "Executing Head-to-Head Comparison...");
+
+    ping();
+    loadPapers();
+    checkLLMStatus();
+  </script>
+</body>
+
+</html>
