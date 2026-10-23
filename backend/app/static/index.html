@@ -1217,7 +1217,7 @@
       try {
         r = await fetch(base() + path, opt);
       } catch (e) {
-        throw new Error("Cannot reach backend at " + base() + ". Please ensure 'python run.py' is running on port 8000.");
+        throw new Error("Cannot reach backend at " + base() + ". Please ensure 'python run.py' is running.");
       }
       if (!r.ok) {
         let d = "";

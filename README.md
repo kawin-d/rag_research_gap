@@ -141,8 +141,9 @@ cp .env.example .env
 ```bash
 python run.py
 ```
-The server will start at:
-- **API Base:** `http://127.0.0.1:8000`
+The server host and port can be customized in `.env` via `HOST` (default: `127.0.0.1`) and `PORT` (default: `8000`).
+By default, the server starts at:
+- **Interactive Web UI:** `http://127.0.0.1:8000/ui`
 - **Interactive Swagger Documentation:** `http://127.0.0.1:8000/docs`
 - **ReDoc:** `http://127.0.0.1:8000/redoc`
 

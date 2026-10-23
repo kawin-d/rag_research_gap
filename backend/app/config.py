@@ -24,6 +24,10 @@ class Settings(BaseModel):
     VERSION: str = "1.0.0"
     API_V1_PREFIX: str = "/api"
 
+    # Server Configuration
+    HOST: str = os.getenv("HOST", "127.0.0.1")
+    PORT: int = int(os.getenv("PORT", "8000"))
+
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", f"sqlite:///{DATA_DIR / 'research_system.db'}")
 
