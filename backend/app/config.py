@@ -25,7 +25,7 @@ class Settings(BaseModel):
     API_V1_PREFIX: str = "/api"
 
     # Server Configuration
-    HOST: str = os.getenv("HOST", "127.0.0.1")
+    HOST: str = os.getenv("HOST", "0.0.0.0")
     PORT: int = int(os.getenv("PORT", "8000"))
 
     # Database
